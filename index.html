@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MONEY_TRACKER– Home</title>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#baaf34">
+
+  <style>
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins', sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color:#333;
+  min-height:100vh;
+}
+
+.wrapper {
+  width:100%;
+  max-width:1100px;
+  margin:0 auto;
+  padding:20px;
+}
+
+.navbar {
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.logo {
+  font-size:2rem;
+  font-weight:700;
+  color:#fff;
+  letter-spacing:1px;
+}
+
+/* HERO */
+.hero {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:50vh;
+}
+
+.menu-container {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  padding:30px;
+  border-radius:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.menu-container button {
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+  background:#fff;
+  color:#764ba2;
+}
+
+.menu-container button:hover {
+  transform:scale(1.05);
+  background:#f1f1f1;
+}
+
+
+.tasks {
+  margin-top:20px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(12px);
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+.notes {
+  margin-top:20px;
+  padding:15px;
+  border-radius:10px;
+  background: rgba(255,255,255,0.15);
+}
+
+.tasks h2, .notes h2 {
+  color:#fff;
+  margin-bottom:10px;
+}
+
+/* LIST */
+ul {
+  list-style:none;
+  margin-top:10px;
+}
+
+li {
+  margin:8px 0;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#fff;
+  border-radius:8px;
+  transition:0.2s;
+}
+
+li:hover {
+  transform:translateX(5px);
+}
+
+
+input, textarea {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
+  outline:none;
+}
+
+textarea {
+  min-height:80px;
+  resize:vertical;
+}
+
+
+.add-btn {
+  background:#667eea;
+  color:#fff;
+  padding:8px 15px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.remove-btn {
+  background:#ff6b6b;
+  color:#fff;
+  padding:5px 10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.add-btn:hover {
+  background:#5563c1;
+}
+
+.remove-btn:hover {
+  background:#e63946;
+}
+
+@media (max-width:768px) {
+  .hero {
+    height:auto;
+    padding:20px;
+  }
+
+  .menu-container {
+    width:100%;
+  }
+}
+</style>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('Service Worker registered:', reg.scope))
+          .catch(err => console.error('SW registration failed:', err.message));
+      });
+    }
+    function saveData() {
+      const tasks = Array.from(document.getElementById('taskList').children).map(li => li.firstChild.textContent.trim());
+      const notes = Array.from(document.getElementById('noteList').children).map(li => li.firstChild.textContent.trim());
+      localStorage.setItem('studyHubTasks', JSON.stringify(tasks));
+      localStorage.setItem('studyHubNotes', JSON.stringify(notes));
+    }
+
+    function loadData() {
+      const savedTasks = JSON.parse(localStorage.getItem('studyHubTasks')) || [];
+      const savedNotes = JSON.parse(localStorage.getItem('studyHubNotes')) || [];
+      const taskList = document.getElementById('taskList');
+      const noteList = document.getElementById('noteList');
+
+      savedTasks.forEach(task => addItem(task, taskList));
+      savedNotes.forEach(note => addItem(note, noteList));
+    }
+
+    function addItem(content, list) {
+      const li = document.createElement('li');
+      li.textContent = content;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = "Remove";
+      removeBtn.className = "remove-btn";
+      removeBtn.onclick = () => {
+        li.remove();
+        saveData(); 
+      };
+
+      li.appendChild(removeBtn);
+      list.appendChild(li);
+    }
+
+    function addTask() {
+      const taskInput = document.getElementById("taskInput");
+      const taskList = document.getElementById("taskList");
+      const value = taskInput.value.trim();
+      if (value !== "") {
+        addItem(value, taskList);
+        taskInput.value = "";
+        saveData(); 
+      }
+    }
+
+    function addNote() {
+      const noteInput = document.getElementById("noteInput");
+      const noteList = document.getElementById("noteList");
+      const value = noteInput.value.trim();
+      if (value !== "") {
+        addItem(value, noteList);
+        noteInput.value = "";
+        saveData(); 
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadData);
+
+    document.getElementById('taskInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') addTask();
+    });
+    document.getElementById('noteInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter' && e.ctrlKey) addNote();
+    });
+  </script>
+</head>
+<body>
+  <div class="wrapper">
+    <header class="navbar">
+      <div class="logo">TRAVEL_BODY</div>
+    </header>
+
+    <section class="hero">
+      <div class="menu-container">
+        <button onclick="document.getElementById('tasksSection').style.display='block'">Show Daily Tasks</button>
+        <button onclick="document.getElementById('tasksSection').style.display='none'">Hide Tasks</button>
+      </div>
+    </section>
+
+    <div id="tasksSection" class="tasks" style="display:none;">
+      <h2>Daily Tasks</h2>
+      <input type="text" id="taskInput" placeholder="Enter a new task (Press Enter to add)">
+      <button class="add-btn" onclick="addTask()">Add Task</button>
+      <ul id="taskList"></ul>
+
+      <div class="notes">
+        <h2>Notes</h2>
+        <textarea id="noteInput" placeholder="Write a note... (Press Ctrl+Enter to add)"></textarea>
+        <button class="add-btn" onclick="addNote()">Add Note</button>
+        <ul id="noteList"></ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
